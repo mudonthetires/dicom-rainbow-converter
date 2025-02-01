@@ -3,22 +3,43 @@
 <head>
     <title>Processed Image</title>
     <style>
+        /* Make the image larger initially */
         #image {
             transition: transform 0.2s; /* Smooth zoom effect */
+            max-width: 100%;  /* Ensures the image fits within its container */
+            max-height: 600px;  /* Set a max height to prevent huge images */
+        }
+
+        /* Container to hold the image and buttons to keep them from being hidden */
+        #image-container {
+            position: relative;
+            text-align: center;
+        }
+
+        /* Ensure buttons appear above the image */
+        #controls {
+            position: absolute;
+            top: 80%;
+            width: 100%;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <h1>Processed Image</h1>
-    <img id="image" src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image" width="500">
-    <br>
-    <label for="zoomSlider">Zoom:</label>
-    <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
-    <span id="zoomValue">100%</span>
-    <br>
-    <a href="{{ url_for('download_file', filename=filename) }}" download>
-        <button>Download Processed Image</button>
-    </a>
+    
+    <div id="image-container">
+        <img id="image" src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image">
+        <div id="controls">
+            <label for="zoomSlider">Zoom:</label>
+            <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
+            <span id="zoomValue">100%</span>
+            <br>
+            <a href="{{ url_for('download_file', filename=filename) }}" download>
+                <button>Download Processed Image</button>
+            </a>
+        </div>
+    </div>
 
     <script>
         const slider = document.getElementById("zoomSlider");
