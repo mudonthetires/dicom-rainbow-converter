@@ -2,13 +2,34 @@
 <html>
 <head>
     <title>Processed Image</title>
+    <style>
+        #image {
+            transition: transform 0.2s; /* Smooth zoom effect */
+        }
+    </style>
 </head>
 <body>
     <h1>Processed Image</h1>
-    <img src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image">
+    <img id="image" src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image" width="500">
+    <br>
+    <label for="zoomSlider">Zoom:</label>
+    <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
+    <span id="zoomValue">100%</span>
     <br>
     <a href="{{ url_for('download_file', filename=filename) }}" download>
         <button>Download Processed Image</button>
     </a>
+
+    <script>
+        const slider = document.getElementById("zoomSlider");
+        const zoomValue = document.getElementById("zoomValue");
+        const image = document.getElementById("image");
+
+        slider.addEventListener("input", function() {
+            const zoomLevel = slider.value;
+            zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;  // Update zoom value text
+            image.style.transform = `scale(${zoomLevel})`;  // Apply zoom to image
+        });
+    </script>
 </body>
 </html>
