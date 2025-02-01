@@ -7,7 +7,7 @@
         #image {
             transition: transform 0.2s; /* Smooth zoom effect */
             max-width: 100%;  /* Ensures the image fits within its container */
-            max-height: 600px;  /* Set a max height to prevent huge images */
+            max-height: 800px;  /* Set a larger max height for vertical space */
             cursor: grab;  /* Indicate to the user that the image is draggable */
             position: absolute;
             top: 50%;
@@ -21,14 +21,14 @@
             position: relative;
             overflow: hidden;  /* Prevent the image from going outside its bounds */
             width: 100%;  /* Full width of the container */
-            height: 600px;  /* Set a fixed height */
+            height: 800px;  /* Increase the container height for vertical space */
             text-align: center;
         }
 
         /* Ensure buttons appear above the image */
         #controls {
             position: absolute;
-            top: 80%;
+            top: 85%;  /* Adjust the control buttons' position for the new layout */
             width: 100%;
             text-align: center;
         }
