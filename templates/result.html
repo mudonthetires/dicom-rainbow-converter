@@ -28,7 +28,7 @@
         /* Ensure buttons appear above the image */
         #controls {
             position: absolute;
-            top: 85%;  /* Adjust the control buttons' position for the new layout */
+            top: 90%;  /* Adjust the control buttons' position for the new layout */
             width: 100%;
             text-align: center;
         }
@@ -62,6 +62,11 @@
                 <input type="range" id="levelSlider" min="-100" max="100" step="1" value="0">
                 <span id="levelValue">0</span>
             </div>
+            <div class="slider-container">
+                <label for="widthSlider">Window Width:</label>
+                <input type="range" id="widthSlider" min="50" max="400" step="1" value="200">
+                <span id="widthValue">200</span>
+            </div>
 
             <br>
             <a href="{{ url_for('download_file', filename=filename) }}" download>
@@ -80,6 +85,9 @@
 
         const levelSlider = document.getElementById("levelSlider");
         const levelValue = document.getElementById("levelValue");
+
+        const widthSlider = document.getElementById("widthSlider");
+        const widthValue = document.getElementById("widthValue");
 
         let isDragging = false;
         let startX = 0;
@@ -104,12 +112,21 @@
             applyWindowLevel();
         });
 
+        widthSlider.addEventListener("input", function() {
+            widthValue.textContent = widthSlider.value;  // Display current window width value
+            applyWindowLevel();
+        });
+
         function applyWindowLevel() {
-            // Window and Level effect applied here
+            // Window, Level, and Window Width effect applied here
             const windowValue = parseInt(windowSlider.value, 10);
             const levelValue = parseInt(levelSlider.value, 10);
-            // You can apply these values to adjust the CSS filter for brightness/contrast or use them to modify the image server-side.
+            const widthValue = parseInt(widthSlider.value, 10);
+
+            // Here, you could apply these adjustments to the image's pixel data or through CSS as before
             image.style.filter = `brightness(${100 + windowValue}%) contrast(${100 + levelValue}%)`;
+            
+            // In reality, the window width would affect the image contrast or pixel mapping, which would likely require server-side processing.
         }
 
         // Start dragging
@@ -137,3 +154,4 @@
     </script>
 </body>
 </html>
+
