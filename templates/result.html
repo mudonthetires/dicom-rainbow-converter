@@ -28,11 +28,12 @@
         /* Ensure buttons appear above the image */
         #controls {
             position: absolute;
-            top: 90%;  /* Adjust the control buttons' position for the new layout */
+            top: 80%;  /* Adjust the control buttons' position for the new layout */
             width: 100%;
             text-align: center;
             background-color: rgba(255, 255, 255, 0.7);  /* Add a slight background to make controls more visible */
             padding: 10px 0;  /* Add some padding for better spacing */
+            z-index: 2; /* Make sure controls appear above the image */
         }
 
         /* Window/Level Control Styling */
