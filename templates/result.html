@@ -10,6 +10,10 @@
             max-height: 600px;  /* Set a max height to prevent huge images */
             cursor: grab;  /* Indicate to the user that the image is draggable */
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;  /* Keep zoom/pan centered */
+            transform: translate(-50%, -50%);  /* Center image */
         }
 
         /* Container to hold the image and buttons */
@@ -60,7 +64,7 @@
         slider.addEventListener("input", function() {
             const zoomLevel = slider.value;
             zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;  // Update zoom value text
-            image.style.transform = `scale(${zoomLevel})`;  // Apply zoom to image
+            image.style.transform = `translate(-50%, -50%) scale(${zoomLevel})`;  // Apply zoom to image while keeping it centered
         });
 
         // Start dragging
@@ -76,7 +80,7 @@
             if (isDragging) {
                 offsetX = e.clientX - startX;
                 offsetY = e.clientY - startY;
-                image.style.transform = `scale(${slider.value}) translate(${offsetX}px, ${offsetY}px)`;
+                image.style.transform = `translate(-50%, -50%) scale(${slider.value}) translate(${offsetX}px, ${offsetY}px)`;
             }
         });
 
