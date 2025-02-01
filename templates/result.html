@@ -3,7 +3,7 @@
 <head>
     <title>Processed Image</title>
     <style>
-        /* Make the image larger initially */
+        /* Make the image 25% larger initially */
         #image {
             transition: transform 0.2s; /* Smooth zoom effect */
             max-width: 100%;  /* Ensures the image fits within its container */
@@ -13,7 +13,7 @@
             top: 50%;
             left: 50%;
             transform-origin: center center;  /* Keep zoom/pan centered */
-            transform: translate(-50%, -50%);  /* Center image */
+            transform: translate(-50%, -50%) scale(1.25);  /* Set initial zoom 25% larger */
         }
 
         /* Container to hold the image and buttons */
@@ -32,6 +32,11 @@
             width: 100%;
             text-align: center;
         }
+
+        /* Window/Level Control Styling */
+        .slider-container {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -40,9 +45,24 @@
     <div id="image-container">
         <img id="image" src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image">
         <div id="controls">
+            <!-- Zoom Control -->
             <label for="zoomSlider">Zoom:</label>
-            <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
-            <span id="zoomValue">100%</span>
+            <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1.25">
+            <span id="zoomValue">125%</span>
+            <br>
+
+            <!-- Window/Level Control -->
+            <div class="slider-container">
+                <label for="windowSlider">Window (Brightness):</label>
+                <input type="range" id="windowSlider" min="-100" max="100" step="1" value="0">
+                <span id="windowValue">0</span>
+            </div>
+            <div class="slider-container">
+                <label for="levelSlider">Level (Contrast):</label>
+                <input type="range" id="levelSlider" min="-100" max="100" step="1" value="0">
+                <span id="levelValue">0</span>
+            </div>
+
             <br>
             <a href="{{ url_for('download_file', filename=filename) }}" download>
                 <button>Download Processed Image</button>
@@ -55,6 +75,12 @@
         const zoomValue = document.getElementById("zoomValue");
         const image = document.getElementById("image");
 
+        const windowSlider = document.getElementById("windowSlider");
+        const windowValue = document.getElementById("windowValue");
+
+        const levelSlider = document.getElementById("levelSlider");
+        const levelValue = document.getElementById("levelValue");
+
         let isDragging = false;
         let startX = 0;
         let startY = 0;
@@ -66,6 +92,25 @@
             zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;  // Update zoom value text
             image.style.transform = `translate(-50%, -50%) scale(${zoomLevel})`;  // Apply zoom to image while keeping it centered
         });
+
+        // Window/Level Controls
+        windowSlider.addEventListener("input", function() {
+            windowValue.textContent = windowSlider.value;  // Display current window value
+            applyWindowLevel();
+        });
+
+        levelSlider.addEventListener("input", function() {
+            levelValue.textContent = levelSlider.value;  // Display current level value
+            applyWindowLevel();
+        });
+
+        function applyWindowLevel() {
+            // Window and Level effect applied here
+            const windowValue = parseInt(windowSlider.value, 10);
+            const levelValue = parseInt(levelSlider.value, 10);
+            // You can apply these values to adjust the CSS filter for brightness/contrast or use them to modify the image server-side.
+            image.style.filter = `brightness(${100 + windowValue}%) contrast(${100 + levelValue}%)`;
+        }
 
         // Start dragging
         image.addEventListener("mousedown", (e) => {
@@ -92,4 +137,3 @@
     </script>
 </body>
 </html>
-
