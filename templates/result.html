@@ -28,9 +28,12 @@
         /* Ensure buttons appear above the image */
         #controls {
             position: absolute;
-            top: 85%;  /* Adjust the control buttons' position for the new layout */
-            width: 100%;
-            text-align: center;
+            bottom: 10%;  /* Keep controls above the lowest border of the image */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.7); /* Slight background for readability */
+            padding: 10px;
+            border-radius: 10px;
         }
 
         /* Window/Level Control Styling */
@@ -62,6 +65,11 @@
                 <input type="range" id="levelSlider" min="-100" max="100" step="1" value="0">
                 <span id="levelValue">0</span>
             </div>
+            <div class="slider-container">
+                <label for="widthSlider">Window Width:</label>
+                <input type="range" id="widthSlider" min="50" max="400" step="1" value="200">
+                <span id="widthValue">200</span>
+            </div>
 
             <br>
             <a href="{{ url_for('download_file', filename=filename) }}" download>
@@ -80,6 +88,9 @@
 
         const levelSlider = document.getElementById("levelSlider");
         const levelValue = document.getElementById("levelValue");
+
+        const widthSlider = document.getElementById("widthSlider");
+        const widthValue = document.getElementById("widthValue");
 
         let isDragging = false;
         let startX = 0;
@@ -104,37 +115,20 @@
             applyWindowLevel();
         });
 
+        widthSlider.addEventListener("input", function() {
+            widthValue.textContent = widthSlider.value;  // Display current window width value
+            applyWindowLevel();
+        });
+
         function applyWindowLevel() {
-            // Window and Level effect applied here
+            // Window, Level, and Window Width effect applied here
             const windowValue = parseInt(windowSlider.value, 10);
             const levelValue = parseInt(levelSlider.value, 10);
-            // You can apply these values to adjust the CSS filter for brightness/contrast or use them to modify the image server-side.
+            const widthValue = parseInt(widthSlider.value, 10);
+
+            // Apply brightness and contrast adjustments
             image.style.filter = `brightness(${100 + windowValue}%) contrast(${100 + levelValue}%)`;
         }
-
-        // Start dragging
-        image.addEventListener("mousedown", (e) => {
-            isDragging = true;
-            startX = e.clientX - offsetX;
-            startY = e.clientY - offsetY;
-            image.style.cursor = "grabbing";  // Change cursor when dragging
-        });
-
-        // Drag the image
-        window.addEventListener("mousemove", (e) => {
-            if (isDragging) {
-                offsetX = e.clientX - startX;
-                offsetY = e.clientY - startY;
-                image.style.transform = `translate(-50%, -50%) scale(${slider.value}) translate(${offsetX}px, ${offsetY}px)`;
-            }
-        });
-
-        // Stop dragging
-        window.addEventListener("mouseup", () => {
-            isDragging = false;
-            image.style.cursor = "grab";  // Reset cursor after dragging
-        });
     </script>
 </body>
 </html>
-
