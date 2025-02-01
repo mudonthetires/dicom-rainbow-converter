@@ -8,11 +8,16 @@
             transition: transform 0.2s; /* Smooth zoom effect */
             max-width: 100%;  /* Ensures the image fits within its container */
             max-height: 600px;  /* Set a max height to prevent huge images */
+            cursor: grab;  /* Indicate to the user that the image is draggable */
+            position: absolute;
         }
 
-        /* Container to hold the image and buttons to keep them from being hidden */
+        /* Container to hold the image and buttons */
         #image-container {
             position: relative;
+            overflow: hidden;  /* Prevent the image from going outside its bounds */
+            width: 100%;  /* Full width of the container */
+            height: 600px;  /* Set a fixed height */
             text-align: center;
         }
 
@@ -46,11 +51,41 @@
         const zoomValue = document.getElementById("zoomValue");
         const image = document.getElementById("image");
 
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
         slider.addEventListener("input", function() {
             const zoomLevel = slider.value;
             zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;  // Update zoom value text
             image.style.transform = `scale(${zoomLevel})`;  // Apply zoom to image
         });
+
+        // Start dragging
+        image.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+            image.style.cursor = "grabbing";  // Change cursor when dragging
+        });
+
+        // Drag the image
+        window.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                offsetX = e.clientX - startX;
+                offsetY = e.clientY - startY;
+                image.style.transform = `scale(${slider.value}) translate(${offsetX}px, ${offsetY}px)`;
+            }
+        });
+
+        // Stop dragging
+        window.addEventListener("mouseup", () => {
+            isDragging = false;
+            image.style.cursor = "grab";  // Reset cursor after dragging
+        });
     </script>
 </body>
 </html>
+
