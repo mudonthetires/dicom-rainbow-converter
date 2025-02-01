@@ -31,12 +31,29 @@
             top: 90%;  /* Adjust the control buttons' position for the new layout */
             width: 100%;
             text-align: center;
+            background-color: rgba(255, 255, 255, 0.7);  /* Add a slight background to make controls more visible */
+            padding: 10px 0;  /* Add some padding for better spacing */
         }
 
         /* Window/Level Control Styling */
         .slider-container {
             margin-top: 10px;
         }
+
+        /* Make sliders more visually appealing */
+        input[type="range"] {
+            width: 80%;  /* Make sliders wider */
+            margin: 10px 0;
+        }
+
+        /* Ensure the download button is properly styled */
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -154,4 +171,5 @@
     </script>
 </body>
 </html>
+
 
