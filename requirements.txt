@@ -4,3 +4,4 @@ pydicom
 pillow
 opencv-python-headless
 gunicorn
+matplotlib
