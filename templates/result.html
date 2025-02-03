@@ -3,9 +3,18 @@
 <head>
     <title>Processed Image</title>
     <style>
-        /* Make the image 25% larger initially */
+        /* Image container */
+        #image-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 800px;
+            text-align: center;
+        }
+
+        /* Image */
         #image {
-            transition: transform 0.2s, filter 0.2s;
+            transition: transform 0.2s;
             max-width: 100%;
             max-height: 800px;
             cursor: grab;
@@ -16,22 +25,22 @@
             transform: translate(-50%, -50%) scale(1.25);
         }
 
-        #image-container {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            height: 800px;
-            text-align: center;
+        /* Cropping Overlay */
+        #crop-box {
+            position: absolute;
+            border: 2px dashed red;
+            display: none;
+            background: rgba(255, 0, 0, 0.2);
         }
 
+        /* Controls */
         #controls {
             position: absolute;
             bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
-            border-radius: 10px;
             color: white;
         }
 
@@ -42,112 +51,114 @@
 </head>
 <body>
     <h1>Processed Image</h1>
-    
+
     <div id="image-container">
         <img id="image" src="{{ url_for('processed_file', filename=filename) }}" alt="Rainbow DICOM Image">
+        <div id="crop-box"></div>
+
         <div id="controls">
+            <!-- Zoom -->
             <label for="zoomSlider">Zoom:</label>
             <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1.25">
             <span id="zoomValue">125%</span>
-            <br>
 
+            <!-- Windowing Controls -->
             <div class="slider-container">
-                <label for="windowWidthSlider">Window Width:</label>
-                <input type="range" id="windowWidthSlider" min="1" max="200" step="1" value="100">
-                <span id="windowWidthValue">100</span>
-            </div>
-
-            <div class="slider-container">
-                <label for="windowSlider">Window (Brightness):</label>
+                <label for="windowSlider">Window:</label>
                 <input type="range" id="windowSlider" min="-100" max="100" step="1" value="0">
                 <span id="windowValue">0</span>
             </div>
-
             <div class="slider-container">
-                <label for="levelSlider">Level (Contrast):</label>
+                <label for="levelSlider">Level:</label>
                 <input type="range" id="levelSlider" min="-100" max="100" step="1" value="0">
                 <span id="levelValue">0</span>
             </div>
 
+            <!-- Cropping -->
+            <button id="resetCrop">Reset Crop</button>
+
+            <!-- Download -->
             <br>
-            <a href="{{ url_for('download_file', filename=filename) }}" download>
+            <a id="downloadLink" href="{{ url_for('download_file', filename=filename) }}" download>
                 <button>Download Processed Image</button>
             </a>
         </div>
     </div>
 
     <script>
-        const slider = document.getElementById("zoomSlider");
-        const zoomValue = document.getElementById("zoomValue");
         const image = document.getElementById("image");
-
-        const windowWidthSlider = document.getElementById("windowWidthSlider");
-        const windowWidthValue = document.getElementById("windowWidthValue");
-
+        const zoomSlider = document.getElementById("zoomSlider");
         const windowSlider = document.getElementById("windowSlider");
-        const windowValue = document.getElementById("windowValue");
-
         const levelSlider = document.getElementById("levelSlider");
-        const levelValue = document.getElementById("levelValue");
+        const cropBox = document.getElementById("crop-box");
+        const resetCrop = document.getElementById("resetCrop");
+        const downloadLink = document.getElementById("downloadLink");
 
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
-        let offsetX = 0;
-        let offsetY = 0;
+        let isCropping = false;
+        let startX, startY, endX, endY;
 
-        slider.addEventListener("input", function() {
-            const zoomLevel = slider.value;
-            zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;
+        // Zoom functionality
+        zoomSlider.addEventListener("input", function () {
+            const zoomLevel = zoomSlider.value;
             image.style.transform = `translate(-50%, -50%) scale(${zoomLevel})`;
         });
 
-        windowWidthSlider.addEventListener("input", function() {
-            windowWidthValue.textContent = windowWidthSlider.value;
-            applyWindowLevel();
-        });
-
-        windowSlider.addEventListener("input", function() {
-            windowValue.textContent = windowSlider.value;
-            applyWindowLevel();
-        });
-
-        levelSlider.addEventListener("input", function() {
-            levelValue.textContent = levelSlider.value;
-            applyWindowLevel();
-        });
-
-        function applyWindowLevel() {
-            const windowWidth = parseInt(windowWidthSlider.value, 10);
-            const windowValue = parseInt(windowSlider.value, 10);
-            const levelValue = parseInt(levelSlider.value, 10);
-            
-            const brightness = 100 + windowValue;
-            const contrast = (windowWidth / 100) * (100 + levelValue);
-            
-            image.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+        // Windowing
+        function applyFilters() {
+            image.style.filter = `brightness(${100 + parseInt(windowSlider.value)}%) contrast(${100 + parseInt(levelSlider.value)}%)`;
         }
 
+        windowSlider.addEventListener("input", applyFilters);
+        levelSlider.addEventListener("input", applyFilters);
+
+        // Cropping Logic
         image.addEventListener("mousedown", (e) => {
-            isDragging = true;
-            startX = e.clientX - offsetX;
-            startY = e.clientY - offsetY;
-            image.style.cursor = "grabbing";
+            isCropping = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+            cropBox.style.left = `${startX}px`;
+            cropBox.style.top = `${startY}px`;
+            cropBox.style.width = "0px";
+            cropBox.style.height = "0px";
+            cropBox.style.display = "block";
         });
 
-        window.addEventListener("mousemove", (e) => {
-            if (isDragging) {
-                offsetX = e.clientX - startX;
-                offsetY = e.clientY - startY;
-                image.style.transform = `translate(-50%, -50%) scale(${slider.value}) translate(${offsetX}px, ${offsetY}px)`;
-            }
+        image.addEventListener("mousemove", (e) => {
+            if (!isCropping) return;
+            endX = e.offsetX;
+            endY = e.offsetY;
+            cropBox.style.width = `${Math.abs(endX - startX)}px`;
+            cropBox.style.height = `${Math.abs(endY - startY)}px`;
         });
 
-        window.addEventListener("mouseup", () => {
-            isDragging = false;
-            image.style.cursor = "grab";
+        image.addEventListener("mouseup", async () => {
+            isCropping = false;
+            // Send crop data to backend
+            const cropData = {
+                x: startX,
+                y: startY,
+                width: parseInt(cropBox.style.width),
+                height: parseInt(cropBox.style.height),
+                window: windowSlider.value,
+                level: levelSlider.value
+            };
+            const response = await fetch("/crop_image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cropData)
+            });
+            const result = await response.json();
+            image.src = `/processed/${result.filename}`;
+            downloadLink.href = `/download/${result.filename}`;
+        });
+
+        // Reset Crop
+        resetCrop.addEventListener("click", () => {
+            cropBox.style.display = "none";
+            image.src = `/processed/{{ filename }}`;
         });
     </script>
 </body>
 </html>
+
 
